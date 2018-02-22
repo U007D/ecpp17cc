@@ -13,7 +13,7 @@
 #![feature(termination_trait)]
 
 pub extern crate failure;
-extern crate qst;
+extern crate cpp17cc;
 extern crate libc;
 
 mod di;

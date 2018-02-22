@@ -2,7 +2,7 @@ use std::env::args_os;
 use std::ffi::OsString;
 #[allow(unused_imports)]
 use super::*;
-use qst::{App, Error};
+use cpp17cc::{App, Error};
 
 type Result<T> = std::result::Result<T, Error>;
 

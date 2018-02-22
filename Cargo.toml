@@ -1,6 +1,6 @@
 [package]
 authors = ["Brad Gibson"]
-name = "qst"
+name = "cpp17cc"
 version = "6.0.0"
 
 [[bin]]
@@ -30,7 +30,7 @@ default = ["clippy"]
 test = []
 
 [lib]
-name = "qst"
+name = "cpp17cc"
 path = "src/lib.rs"
 
 [profile.bench]
