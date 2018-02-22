@@ -3,14 +3,8 @@ authors = ["Brad Gibson"]
 name = "cpp17cc"
 version = "6.0.0"
 
-[[bin]]
-doc = false
-name = "quickstart_template"
-path = "src/bin/main.rs"
-test = false
-
-[dependencies.polish]
-git = "https://github.com/alkass/polish"
+[dependencies]
+single = "0.3.0"
 
 [dependencies.clippy]
 optional = true
@@ -19,20 +13,14 @@ version = "*"
 [dependencies.failure]
 version = "0.*"
 
-[dependencies.libc]
-version = "~0"
-
+[dependencies.polish]
+git = "https://github.com/alkass/polish"
 [dev-dependencies.pretty_assertions]
 version = "*"
 
 [features]
 default = ["clippy"]
 test = []
-
-[lib]
-name = "cpp17cc"
-path = "src/lib.rs"
-
 [profile.bench]
 codegen-units = 1
 debug = false
