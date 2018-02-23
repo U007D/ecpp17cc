@@ -3,8 +3,8 @@ authors = ["Brad Gibson"]
 name = "cpp17cc"
 version = "6.0.0"
 
-[dependencies]
-single = "0.3.0"
+[dependencies.structopt]
+version = "*"
 
 [dependencies.clippy]
 optional = true
@@ -13,8 +13,6 @@ version = "*"
 [dependencies.failure]
 version = "0.*"
 
-[dependencies.polish]
-git = "https://github.com/alkass/polish"
 [dev-dependencies.pretty_assertions]
 version = "*"
 

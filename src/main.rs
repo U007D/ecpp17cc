@@ -10,43 +10,55 @@
         unseparated_literal_suffix, /*use_debug,*/ use_self, used_underscore_binding, unused_import_braces,
         unnecessary_mut_passed, unused_qualifications, wrong_pub_self_convention)]
 #![deny(overflowing_literals, unused_must_use)]
-#![feature(termination_trait, try_trait)]
+#![feature(termination_trait, try_trait, iterator_try_fold)]
 
 #[macro_use] extern crate failure;
-extern crate single;
+#[macro_use] extern crate structopt;
 mod consts;
 mod error;
 
 use consts::*;
-pub use error::Errar;
-use single::Single;
+pub use error::Error;
 use std::fs::File;
 use std::ffi::OsString;
 use std::env::args_os;
-use std::io::{BufReader, BufRead, BufWriter};
-type Result<T> = std::result::Result<T, Errar>;
+use std::io::{BufRead, BufReader, BufWriter, Write};
+use structopt::StructOpt;
+
+type Result<T> = std::result::Result<T, Error>;
 
 const CSV_DELIMITER: char = ',';
 
-fn main() -> Result<()> {
-    let args = args_os().map(|arg| arg.into_string())
-                        .collect::<std::result::Result<Vec<_>, OsString>>()?;
-    let (in_file, column_name, replacement, out_file) = (&args[1], &args[2], &args[3], &args[4]);
-    let lines = BufReader::new(File::open(&in_file)?).lines();
-    let col_idx = lines.take(1)
-                       .map(|l| l.map_err(|e| Errar::IoError(e))
-                           .and_then(|s|
-                               s.split(CSV_DELIMITER)
-                                .enumerate()
-                                .filter(|&(i, col_name)| col_name == column_name)
-                                .map(|(i, col_name)| i)
-                                .single()
-                                     .map_err(|e| Errar::SingleError(e))
-                           )
-                       )
-                       .single()??;
-    let wtr = BufWriter::new(File::create(out_file)?);
+#[derive(StructOpt, Debug)]
+struct Opt {
+    in_file: String,
+    col_name: String,
+    replacement: String,
+    out_file: String,
+}
 
-    println!("in_file: {}", col_idx);
+fn main() -> Result<()> {
+    let args = Opt::from_args();
+    let (in_file, col_name, replacement, out_file) = (&args.in_file, &args.col_name, &args.replacement, &args.out_file);
+
+    let mut lines = BufReader::new(File::open(&in_file)?).lines();
+    let col_idx = lines.next()??.split(CSV_DELIMITER)
+                                .position(|c| c == col_name )
+                                .ok_or_else(|| Error::ColumnNotFound(col_name.to_string()))?;
+
+    let mut wtr = BufWriter::new(File::create(out_file)?);
+
+    for line in lines {
+        wtr.write_all((line?.split(CSV_DELIMITER)
+                .enumerate()
+                .map(|(i, c)| {
+                    match i == col_idx {
+                        true => replacement,
+                        false => c,
+                    }
+                })
+                .fold(String::new(), |r, c| r + c + "," ) + "\n")
+            .as_ref())?;
+    }
     Ok(())
 }

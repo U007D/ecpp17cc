@@ -2,50 +2,43 @@ use std::fmt;
 use std::ffi::OsString;
 use std::io::Error as IoError;
 use std::option::NoneError;
-use single::Error as SingleError;
 #[allow(unused_imports)]
 use super::*;
 
 #[derive(Fail, Debug)]  //Papercut: PartialEq is not object safe and cannot be used with io::Error :(
-pub enum Errar {
+pub enum Error {
     //#[fail(display = "{}", MSG_ERROR)]
     ArgInvalidUtf8(OsString),
     IoError(IoError),
-    NoneError(NoneError),
-    SingleError(SingleError),
+    ColumnNotFound(String),
+    NoneError,
 }
 
-impl fmt::Display for Errar {
+impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", match *self {
-            Errar::ArgInvalidUtf8(ref arg) => format!("{}: {:?}", MSG_ERR_ARG_INVALID_UTF8, arg),
-            Errar::IoError(ref err) => format!("{}: {:?}", MSG_ERR_IO_ERROR, err),
-            Errar::NoneError(ref err) => format!("{}: {:?}", MSG_ERR_NONE_ERROR, err),
-            Errar::SingleError(ref err) => format!("{}: {:?}", MSG_ERR_SINGLE_ERROR, err),
+            Error::ArgInvalidUtf8(ref arg) => format!("{}: {:?}", MSG_ERR_ARG_INVALID_UTF8, arg),
+            Error::IoError(ref err) => format!("{}: {:?}", MSG_ERR_IO_ERROR, err),
+            Error::ColumnNotFound(ref name) => format!("{}: {}", MSG_ERR_COLUMN_NOT_FOUND, name),
+            Error::NoneError => format!("{}", MSG_ERR_NONE_ERROR),
         })
     }
 }
 
-impl From<OsString> for Errar {
+impl From<OsString> for Error {
     fn from(arg: OsString) -> Self {
-        Errar::ArgInvalidUtf8(arg)
+        Error::ArgInvalidUtf8(arg)
     }
 }
 
-impl From<IoError> for Errar {
+impl From<IoError> for Error {
     fn from(err: IoError) -> Self {
-        Errar::IoError(err)
+        Error::IoError(err)
     }
 }
 
-impl From<NoneError> for Errar {
-    fn from(err: NoneError) -> Self {
-        Errar::NoneError(err)
-    }
-}
-
-impl From<SingleError> for Errar {
-    fn from(err: SingleError) -> Self {
-        Errar::SingleError(err)
+impl From<NoneError> for Error {
+    fn from(_: NoneError) -> Self {
+        Error::NoneError
     }
 }
